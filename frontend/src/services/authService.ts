@@ -1,53 +1,47 @@
 import { apiRequest } from './api'
 import { LoginResponse, RefreshTokenResponse, User } from '@/types'
-
 // Endpoints de autenticación
 const AUTH_ENDPOINTS = {
-  LOGIN: '/auth/login',
-  REGISTER: '/auth/register',
-  LOGOUT: '/auth/logout',
-  REFRESH: '/auth/refresh',
-  PROFILE: '/auth/me',
-  UPDATE_PROFILE: '/auth/me',
-  CHANGE_PASSWORD: '/auth/change-password',
-  REQUEST_PASSWORD_RESET: '/auth/request-password-reset',
-  RESET_PASSWORD: '/auth/reset-password',
-  VERIFY_EMAIL: '/auth/verify-email',
-  RESEND_VERIFICATION: '/auth/resend-verification',
+LOGIN: '/auth/login',
+REGISTER: '/auth/register',
+LOGOUT: '/auth/logout',
+REFRESH: '/auth/refresh',
+PROFILE: '/auth/me',
+UPDATE_PROFILE: '/auth/me',
+CHANGE_PASSWORD: '/auth/change-password',
+REQUEST_PASSWORD_RESET: '/auth/request-password-reset',
+RESET_PASSWORD: '/auth/reset-password',
+VERIFY_EMAIL: '/auth/verify-email',
+RESEND_VERIFICATION: '/auth/resend-verification',
 } as const
-
 // Interfaz para datos de login
 interface LoginCredentials {
-  email: string
-  password: string
+email: string
+password: string
 }
-
 // Interfaz para datos de registro
 interface RegisterData {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
+email: string
+password: string
+firstName: string
+lastName: string
 }
-
 // Servicio de autenticación
 export const authService = {
-  /**
-   * Iniciar sesión con email y contraseña
-   */
-  async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await apiRequest.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, {
-      username: email, // FastAPI OAuth2 usa 'username' por convención
-      password,
-    })
-    
-    // Guardar tokens en localStorage
-    if (response.access_token) {
-      localStorage.setItem('access_token', response.access_token)
-      localStorage.setItem('user', JSON.stringify(response.user))
-    }
-    
-    return response
+/**
+* Iniciar sesión con email y contraseña
+*/
+async login(email: string, password: string): Promise<LoginResponse> {
+const response = await apiRequest.post<LoginResponse>(AUTH_ENDPOINTS.LOGIN, {
+username: email, // FastAPI OAuth2 usa 'username' por convención
+password,
+})
+// Guardar tokens en localStorage
+if (response.access_token) {
+localStorage.setItem('access_token', response.access_token)
+localStorage.setItem('user', JSON.stringify(response.user))
+}
+return response
   },
 
   /**
