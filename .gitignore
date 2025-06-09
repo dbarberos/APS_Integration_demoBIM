@@ -192,3 +192,51 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+
+
+# Dependencias
+node_modules/
+*/node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv
+# Builds
+dist/
+build/
+*.egg-info/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+# OS
+.DS_Store
+Thumbs.db
+# Logs
+*.log
+logs/
+# Temporary files
+tmp/
+temp/
+# Database
+*.db
+*.sqlite
+# Secrets
+.env.local
+.env.production
+.env.development
+# Vercel
+.vercel
+# Cache
+.cache/
+.parcel-cache/
+# Coverage
+coverage/
+.nyc_output/
