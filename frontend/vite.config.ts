@@ -30,7 +30,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Desactivar sourcemaps en producción para Vercel
     rollupOptions: {
       output: {
         manualChunks: {
@@ -43,6 +43,10 @@ export default defineConfig({
         },
       },
     },
+    // Configuración específica para Vercel
+    chunkSizeWarningLimit: 1000,
+    target: 'esnext',
+    
   },
   test: {
     globals: true,
