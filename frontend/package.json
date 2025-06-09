@@ -61,6 +61,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "vercel-build": "npm run build",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
