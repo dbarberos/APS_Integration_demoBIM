@@ -15,7 +15,7 @@ import {
   updatePreferences,
 } from '@/store/slices/authSlice'
 import { addToast } from '@/store/slices/uiSlice'
-import authService from '@/services/authService.vercel'
+import authService from '@/services/authService.remote'
 import type { User } from '@/types'
 
 export const useAuth = () => {
