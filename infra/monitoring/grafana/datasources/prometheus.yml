@@ -1,0 +1,88 @@
+# Grafana Datasource Configuration for Prometheus
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    version: 1
+    basicAuth: false
+    withCredentials: false
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+      httpMethod: GET
+      customQueryParameters: ""
+      manageAlerts: true
+      alertmanagerUid: alertmanager
+      prometheusType: Prometheus
+      prometheusVersion: "2.40.0"
+      cacheLevel: Low
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: jaeger
+          url: http://jaeger:16686/trace/$${__value.raw}
+
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    uid: alertmanager
+    editable: true
+    version: 1
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: false
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: true
+    version: 1
+    jsonData:
+      derivedFields:
+        - datasourceUid: jaeger
+          matcherRegex: "traceID=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
+        - datasourceUid: prometheus
+          matcherRegex: ".*"
+          name: Prometheus
+          url: "/d/prometheus-dashboard"
+
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: aps_db
+    user: ${POSTGRES_USER}
+    editable: true
+    version: 1
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 0
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    url: redis:6379
+    editable: true
+    version: 1
+    jsonData:
+      client: standalone
+      poolSize: 5
+      timeout: 10
+      pingInterval: 0
+      pipelineWindow: 0

@@ -1,0 +1,218 @@
+# Prometheus Alert Rules for APS Application
+
+groups:
+  # Infrastructure Alerts
+  - name: infrastructure
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage on {{ $labels.instance }} has been above 80% for more than 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage on {{ $labels.instance }} has been above 90% for more than 5 minutes."
+
+      - alert: DiskSpaceLow
+        expr: node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"} * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk space on {{ $labels.instance }} is below 10% ({{ $value }}%)"
+
+  # Application Alerts
+  - name: application
+    rules:
+      - alert: APIHighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is {{ $value }}% for the last 5 minutes"
+
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency"
+          description: "95th percentile latency is {{ $value }}s for the last 5 minutes"
+
+      - alert: DatabaseConnectionsHigh
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database connections"
+          description: "Database connections are at {{ $value }}% of maximum"
+
+      - alert: CeleryQueueSize
+        expr: celery_queue_length > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Large Celery queue"
+          description: "Celery queue {{ $labels.queue }} has {{ $value }} pending tasks"
+
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is {{ $value }}%"
+
+  # APS Specific Alerts
+  - name: aps_business
+    rules:
+      - alert: TranslationFailureRate
+        expr: rate(aps_translations_total{status="failed"}[5m]) / rate(aps_translations_total[5m]) * 100 > 10
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High translation failure rate"
+          description: "Translation failure rate is {{ $value }}% for the last 5 minutes"
+
+      - alert: TranslationQueueBacklog
+        expr: aps_translation_queue_size > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Translation queue backlog"
+          description: "Translation queue has {{ $value }} pending jobs for more than 10 minutes"
+
+      - alert: FileUploadErrors
+        expr: rate(aps_file_uploads_total{status="error"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "File upload errors detected"
+          description: "File upload error rate is {{ $value }} per second"
+
+      - alert: ViewerSessionsHigh
+        expr: aps_viewer_sessions_active > 500
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High number of active viewer sessions"
+          description: "{{ $value }} viewer sessions are currently active"
+
+      - alert: APSAPIRateLimit
+        expr: rate(aps_api_requests_total{service="autodesk", status="429"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "APS API rate limit reached"
+          description: "APS API rate limiting detected - {{ $value }} requests/sec being throttled"
+
+  # Container and Docker Alerts
+  - name: containers
+    rules:
+      - alert: ContainerKilled
+        expr: increase(container_cpu_usage_seconds_total{container_label_com_docker_compose_service!=""}[1m]) == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container killed"
+          description: "Container {{ $labels.name }} was killed"
+
+      - alert: ContainerCPUHigh
+        expr: rate(container_cpu_usage_seconds_total[3m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High container CPU usage"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value }}%"
+
+      - alert: ContainerMemoryHigh
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High container memory usage"
+          description: "Container {{ $labels.name }} memory usage is {{ $value }}%"
+
+  # Security Alerts
+  - name: security
+    rules:
+      - alert: SuspiciousAPIActivity
+        expr: rate(http_requests_total{status="401"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of unauthorized requests"
+          description: "{{ $value }} unauthorized requests per second detected"
+
+      - alert: TooManyFailedLogins
+        expr: rate(aps_auth_login_attempts_total{status="failed"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Multiple failed login attempts"
+          description: "{{ $value }} failed login attempts per second from {{ $labels.client_ip }}"
+
+      - alert: UnusualTrafficPattern
+        expr: rate(http_requests_total[5m]) > 100
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Unusual traffic pattern detected"
+          description: "Request rate of {{ $value }} requests/sec is unusually high"
+
+  # External Dependencies
+  - name: external_services
+    rules:
+      - alert: AutodeskAPIDown
+        expr: probe_success{job="blackbox", instance="https://developer.api.autodesk.com"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Autodesk API is down"
+          description: "Autodesk Platform Services API is not responding"
+
+      - alert: AutodeskAPIHighLatency
+        expr: probe_duration_seconds{job="blackbox", instance="https://developer.api.autodesk.com"} > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Autodesk API high latency"
+          description: "Autodesk API response time is {{ $value }}s"
