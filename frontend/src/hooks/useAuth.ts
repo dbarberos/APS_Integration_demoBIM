@@ -15,7 +15,7 @@ import {
   updatePreferences,
 } from '@/store/slices/authSlice'
 import { addToast } from '@/store/slices/uiSlice'
-import { getStoredToken, getStoredUser, isTokenExpired } from '@/services/authService'
+import { getStoredToken, getStoredUser, isTokenExpired } from '@/services/authService.vercel'
 import type { User } from '@/types'
 
 export const useAuth = () => {
