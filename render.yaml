@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: aps-backend
+    env: python
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aps-postgres
+          property: connectionString
+      - key: APS_CLIENT_ID
+        sync: false
+      - key: APS_CLIENT_SECRET
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+databases:
+  - name: aps-postgres
+    databaseName: aps_db
+    user: aps_user
+    plan: free
