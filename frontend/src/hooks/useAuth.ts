@@ -36,17 +36,14 @@ export const useAuth = () => {
   // Verificar autenticación al montar el componente
   useEffect(() => {
     const initializeAuth = () => {
-      const storedToken = getStoredToken()
-      const storedUser = getStoredUser()
+      const storedToken = authService.getCurrentToken()
+      const storedUser = authService.getCurrentUser()
       
-      if (storedToken && storedUser && !isTokenExpired(storedToken)) {
+      if (storedToken && storedUser) {
         dispatch(setCredentials({
           user: storedUser,
           token: storedToken,
-        }))
-      } else if (storedToken && isTokenExpired(storedToken)) {
-        // Token expirado, hacer logout
-        handleLogout()
+        }))      
       }
     }
     
