@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { User, LoginResponse, ApiError } from '@/types'
-import * as authService from '@/services/authService'
+import * as authService from '@/services/authService.vercel'
 import Cookies from 'js-cookie'
 
 export interface AuthState {
