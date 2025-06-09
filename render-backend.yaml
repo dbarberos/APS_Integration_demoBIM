@@ -1,0 +1,42 @@
+# Configuración específica para el backend en Render
+services:
+  - type: web
+    name: aps-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      - key: APS_CLIENT_ID
+        sync: false
+      - key: APS_CLIENT_SECRET
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: POSTGRES_SERVER
+        fromDatabase:
+          name: aps-postgres
+          property: host
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: aps-postgres
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: aps-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: aps-postgres
+          property: password
+      - key: POSTGRES_PORT
+        value: "5432"
+databases:
+  - name: aps-postgres
+    databaseName: aps_db
+    user: aps_user
+    plan: free
