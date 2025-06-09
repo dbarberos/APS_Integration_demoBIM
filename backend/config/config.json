@@ -1,0 +1,20 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "tu_password_local",
+    "database": "nombre_db_local",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": { ... },
+  "production": {
+    "use_env_variable": "DATABASE_URL", // ¡Cambio clave!
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false // Necesario para Supabase
+      }
+    }
+  }
+}
