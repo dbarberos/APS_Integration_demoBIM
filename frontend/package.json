@@ -13,6 +13,7 @@
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.20.1",
     "axios": "^1.6.2",
+    "@autodesk/viewer": "7.89.0",
     "@autodesk/viewer-react": "^1.9.2",
     "@tailwindcss/forms": "^0.5.7",
     "@headlessui/react": "^1.7.17",
