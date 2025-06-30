@@ -59,6 +59,7 @@
     "jsdom": "^23.0.1"
   },
   "scripts": {
+    "preinstall": "echo '--- VERCEL BUILD DEBUG ---' && pwd && ls -la && echo '--- .npmrc content ---' && cat .npmrc || echo '!!! .npmrc not found !!!' && echo '--- END DEBUG ---'",
     "dev": "vite",
     "build": "tsc && vite build",
     "vercel-build": "npm run build",
